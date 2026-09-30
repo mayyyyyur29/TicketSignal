@@ -85,7 +85,19 @@ def test_answer_question_returns_anomalies(monkeypatch: pytest.MonkeyPatch) -> N
         "intent": "anomaly_query",
         "anomalies": results,
     }
-    find_anomalies.assert_called_once_with()
+    find_anomalies.assert_called_once_with(None)
+
+
+def test_answer_question_passes_week_anomaly_timeframe(monkeypatch: pytest.MonkeyPatch) -> None:
+    _mock_llm(monkeypatch, json.dumps({"intent": "anomaly_query", "timeframe": "week"}))
+    find_anomalies = Mock(return_value=[])
+    monkeypatch.setattr(anomalies, "find_anomalies", find_anomalies)
+
+    assert orchestrator.answer_question("Any anomalies this week?") == {
+        "intent": "anomaly_query",
+        "anomalies": [],
+    }
+    find_anomalies.assert_called_once_with("week")
 
 
 def test_answer_question_returns_anomaly_database_error(

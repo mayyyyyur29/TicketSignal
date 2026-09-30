@@ -33,8 +33,8 @@ def _get_pool() -> ConnectionPool:
                     raise QueryExecutionError("LLM_DATABASE_URL is not set")
                 pool = ConnectionPool(database_url, min_size=1, max_size=4, open=False)
                 pool.open(wait=True)
-                _pool = pool
-    return _pool
+                _pool = pool # type: ignore
+    return _pool # type: ignore
 
 
 def run_query(
@@ -57,7 +57,7 @@ def run_query(
                         "SELECT set_config('app.as_of', %s, true)",
                         (as_of,),
                     )
-                cursor.execute(sql)
+                cursor.execute(sql) # type: ignore
                 return cursor.fetchall()
     except QueryExecutionError:
         raise

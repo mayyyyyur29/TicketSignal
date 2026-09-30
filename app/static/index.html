@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ticket Intelligence</title>
+  <style>
+    body { max-width: 48rem; margin: 3rem auto; padding: 0 1rem; font: 16px/1.5 system-ui, sans-serif; color: #202a32; }
+    form { display: flex; gap: .5rem; } input { flex: 1; min-width: 0; padding: .65rem; font: inherit; }
+    button { padding: .65rem 1rem; font: inherit; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; } th, td { padding: .5rem; border: 1px solid #ccd4d8; text-align: left; }
+    th { background: #f1f4f5; } .table-wrap { overflow-x: auto; }
+    .error { margin: 1rem 0; padding: .75rem; border: 1px solid #b42318; color: #8f1d16; }
+    details { margin: .75rem 0; } pre { padding: 1rem; overflow: auto; background: #f1f4f5; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Ticket Intelligence</h1>
+  <form id="question-form">
+    <input id="question" type="text" placeholder="Ask about support tickets" required>
+    <button type="submit">Ask</button>
+  </form>
+  <section id="response" aria-live="polite"></section>
+  <p><a id="raw-toggle" href="#" hidden>Show raw JSON</a></p>
+  <pre id="raw-json" hidden></pre>
+  <script>
+    const form = document.querySelector('#question-form'), question = document.querySelector('#question');
+    const response = document.querySelector('#response'), rawToggle = document.querySelector('#raw-toggle');
+    const rawJson = document.querySelector('#raw-json');
+    function element(tag, text) {
+      const node = document.createElement(tag);
+      if (text !== undefined) node.textContent = String(text);
+      return node;
+    }
+    function render(data) {
+      response.replaceChildren(); rawJson.textContent = JSON.stringify(data, null, 2); rawToggle.hidden = false;
+      if (data.error != null) {
+        const box = element('div', data.error); box.className = 'error'; response.append(box); return;
+      }
+      if (data.intent === 'data_query' && data.rows != null) {
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        if (!rows.length) response.append(element('p', 'No rows returned.'));
+        else {
+          const table = element('table'), columns = Object.keys(rows[0]), head = element('tr');
+          columns.forEach((key) => head.append(element('th', key)));
+          const thead = element('thead'), body = element('tbody'); thead.append(head);
+          rows.forEach((row) => {
+            const tr = element('tr'); columns.forEach((key) => tr.append(element('td', row[key] ?? ''))); body.append(tr);
+          });
+          table.append(thead, body); const wrap = element('div'); wrap.className = 'table-wrap';
+          wrap.append(table); response.append(wrap);
+        }
+        if (data.sql) {
+          const details = element('details'); details.append(element('summary', 'SQL used'), element('pre', data.sql));
+          response.append(details);
+        }
+        if (Array.isArray(data.assumptions) && data.assumptions.length) {
+          const list = element('ul'); data.assumptions.forEach((item) => list.append(element('li', item))); response.append(list);
+        }
+      } else if (data.intent === 'anomaly_query' && data.anomalies != null) {
+        const list = element('ul');
+        data.anomalies.forEach((item) => {
+          const line = element('li'); line.append(element('strong', item.ticket_id), document.createTextNode(` ${item.reason}`)); list.append(line);
+        });
+        response.append(list);
+      } else if (data.intent === 'unsupported') response.append(element('p', data.message ?? ''));
+    }
+    rawToggle.addEventListener('click', (event) => {
+      event.preventDefault(); rawJson.hidden = !rawJson.hidden;
+      rawToggle.textContent = rawJson.hidden ? 'Show raw JSON' : 'Hide raw JSON';
+    });
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault(); response.textContent = 'Loading...'; rawToggle.hidden = true; rawJson.hidden = true;
+      try {
+        const result = await fetch('/query', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question.value }) });
+        render(await result.json());
+      } catch (error) { render({ error: String(error) }); }
+    });
+  </script>
+</body>
+</html>

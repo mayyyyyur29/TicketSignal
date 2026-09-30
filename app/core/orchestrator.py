@@ -19,12 +19,12 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 def answer_question(question: str) -> dict:
     completion = Groq().chat.completions.create(
         model=os.environ["GROQ_MODEL"],
-        messages=build_messages(question),
+        messages=build_messages(question), # type: ignore
         temperature=0,
         response_format={"type": "json_object"},
     )
     try:
-        result = json.loads(completion.choices[0].message.content)
+        result = json.loads(completion.choices[0].message.content) # type: ignore
     except (AttributeError, IndexError, TypeError, json.JSONDecodeError):
         return {"intent": "unsupported", "error": "could not parse LLM response"}
     if not isinstance(result, dict) or "intent" not in result:
@@ -37,7 +37,8 @@ def answer_question(question: str) -> dict:
         return {"intent": "unsupported", "message": "I can help analyze support ticket data."}
     if intent == "anomaly_query":
         try:
-            results = anomalies.find_anomalies()
+            timeframe = "week" if result.get("timeframe") == "week" else None
+            results = anomalies.find_anomalies(timeframe)
         except QueryExecutionError as exc:
             return {"intent": "anomaly_query", "error": str(exc)}
         return {"intent": "anomaly_query", "anomalies": results}

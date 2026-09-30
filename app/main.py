@@ -22,4 +22,4 @@ def health() -> dict[str, str]:
 
 static_dir = Path(__file__).parent / "static"
 if static_dir.is_dir() and any(static_dir.iterdir()):
-	app.mount("/static", StaticFiles(directory=static_dir), name="static")
+	app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")

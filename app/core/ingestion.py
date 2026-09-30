@@ -37,6 +37,10 @@ def validate(df):
         ticket_id = row.get("ticket_id", None)
         ticket_key = str(ticket_id) if pd.notna(ticket_id) else ""
 
+        if not ticket_key.strip():
+            rejects.append((None, "ticket_id is required"))
+            continue
+
         if ticket_key in duplicate_ids:
             rejects.append((ticket_key or None, "duplicate ticket_id"))
             continue
@@ -59,10 +63,14 @@ def validate(df):
         rating = row.get("customer_rating")
         if pd.notna(rating):
             try:
-                rating_value = int(rating)
+                numeric_rating = float(rating)
             except (TypeError, ValueError):
                 rejects.append((ticket_key or None, "rating outside 1-5"))
                 continue
+            if not numeric_rating.is_integer():
+                rejects.append((ticket_key, "customer_rating must be a whole number"))
+                continue
+            rating_value = int(numeric_rating)
             if rating_value < 1 or rating_value > 5:
                 rejects.append((ticket_key or None, "rating outside 1-5"))
                 continue

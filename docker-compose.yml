@@ -11,6 +11,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/roles.sql:/docker-entrypoint-initdb.d/02_roles.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -25,6 +27,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ingest:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:
@@ -34,6 +38,31 @@ services:
       - "8000:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "scripts/run_ingest.py"]
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: streamlit run app/ui.py --server.port 8501 --server.address 0.0.0.0
+    depends_on:
+      - app
+    environment:
+      STREAMLIT_API_URL: http://app:8000/query
+    ports:
+      - "8501:8501"
 
 volumes:
   postgres_data:

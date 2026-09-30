@@ -5,6 +5,7 @@ python-dotenv
 groq
 httpx
 fastapi
+streamlit
 uvicorn[standard]
 pydantic>=2
 sqlglot

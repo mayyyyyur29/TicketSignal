@@ -53,7 +53,13 @@ def validate_sql(sql: str) -> tuple[bool, str]:
         ):
             if isinstance(node.parent, exp.Dot) and node.parent.expression is node:
                 return False, "schema-qualified functions are not allowed"
-            function = node.name.lower() if isinstance(node, exp.Anonymous) else node.sql_name().lower()
+            function = (
+                "date_trunc"
+                if isinstance(node, exp.TimestampTrunc)
+                else node.name.lower()
+                if isinstance(node, exp.Anonymous)
+                else node.sql_name().lower()
+            )
             if function in {"now", "current_date", "current_timestamp"}:
                 return False, f"function {function} is not allowed"
             if function not in _ALLOWED_FUNCTIONS:
