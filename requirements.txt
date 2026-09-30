@@ -1,0 +1,11 @@
+pandas
+psycopg[binary]
+psycopg_pool
+python-dotenv
+groq
+httpx
+fastapi
+uvicorn[standard]
+pydantic>=2
+sqlglot
+pytest

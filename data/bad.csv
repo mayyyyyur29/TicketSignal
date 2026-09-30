@@ -1,0 +1,15 @@
+ticket_id,created_at,category,priority,status,response_time_hrs,resolution_time_hrs,agent_id,customer_rating,issue_summary
+TKT-001,2024-02-05 11:14,General,Low,Resolved,3.7,7.8,AGT-03,4,Request for product documentation
+TKT-002,2024-03-05 17:01,Billing,Low,Resolved,1.2,13.7,AGT-09,4,Incorrect charge on invoice
+TKT-003,2024-02-13 12:09,Billing,High,Resolved,4.8,2.1,AGT-04,5,Unexpected fee on account
+TKT-004,2024-03-09 09:59,Billing,High,Resolved,0.6,10.7,AGT-07,4,Subscription not activated after payment
+TKT-005,2024-03-25 11:49,General,Low,Open,4.9,,AGT-05,,How to export data to CSV
+TKT-006,2024-03-22 13:10,Technical,Low,Resolved,1.9,34.1,AGT-06,2,Dashboard not loading
+TKT-007,2024-01-21 15:24,General,High,Open,4.9,,AGT-05,,Question about usage limits
+TKT-008,2024-01-08 11:52,General,Medium,Resolved,4.1,22.1,AGT-01,4,Request for account deletion
+TKT-009,2024-02-20 18:29,Billing,High,Resolved,1.5,3.9,AGT-03,4,Wrong plan charged
+TKT-010,2024-01-18 16:31,Technical,Low,Open,3.8,,AGT-02,,Dashboard not loading
+TKT-011,2024-03-28 14:38,General,Low,Resolved,2.0,15.1,AGT-02,4,Request for product documentation
+TKT-002,2024-03-05 17:01,Billing,Low,Resolved,1.2,13.7,AGT-09,4,Duplicate row for testing
+TKT-013,2024-02-10 08:00,General,Low,Pending,2.5,5.0,AGT-08,3,Invalid status test
+TKT-014,,General,Low,Resolved,2.5,5.0,AGT-08,3,Missing timestamp test
