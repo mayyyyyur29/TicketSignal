@@ -1,12 +1,17 @@
+# Data and database
 pandas
 psycopg[binary]
 psycopg_pool
-python-dotenv
+
+# API and LLM client
+fastapi
+uvicorn[standard]
 groq
 httpx
-fastapi
-streamlit
-uvicorn[standard]
+python-dotenv
 pydantic>=2
 sqlglot
+
+# UI and tests
+streamlit
 pytest
